@@ -211,10 +211,52 @@ class MinimaxPlayer(IsolationPlayer):
         """
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
+            
+        return self.minimaxHelper(game, depth)[0]
 
-        # TODO: finish this function!
-        raise NotImplementedError
+            
+        
+    def minimaxHelper(self, game, depth):
+        """helper function so that both moves and scores can be manipulated
+    
+        Parameters
+        ----------
+        game : isolation.Board
+            An instance of the Isolation game `Board` class representing the
+            current game state
+    
+        depth : int
+            Depth is an integer representing the maximum number of plies to
+            search in the game tree before aborting
+    
+        Returns
+        -------
+        ((int, int), int)
+            Tuple where the first entry is the best move and the second is the corresponding value
+        """
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+        # Check which player's turn it is, and appropriately designate max/min as the function
+        if game.active_player == self:
+            fn, val = max, float("-inf")
+        else:
+            fn, val = min, float("inf")
+            
+        # when the search terminates, return the score of the current position
+        if depth == 0:
+            return (None, self.score(game, self))
+        else:
+            best_move = (-1, -1)
+            # go through each legal move and evaluate the score, iterate up to specified depth
+            for move in game.get_legal_moves():
+                trialGame = game.forecast_move(move)
+                trialScore = self.minimaxHelper(trialGame, depth-1)[1]
+                # if current move gives the best score, keep it
+                if fn(trialScore, val) == trialScore:
+                    best_move, val = move, trialScore
+            return (best_move, val) 
 
+    
 
 class AlphaBetaPlayer(IsolationPlayer):
     """Game-playing agent that chooses a move using iterative deepening minimax
