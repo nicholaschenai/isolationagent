@@ -295,9 +295,17 @@ class AlphaBetaPlayer(IsolationPlayer):
             (-1, -1) if there are no available legal moves.
         """
         self.time_left = time_left
-
-        # TODO: finish this function!
-        raise NotImplementedError
+        
+        best_move = (-1, -1)
+        depth = 1
+        while True:
+            try:
+                best_move = self.alphabeta(game, depth)
+                depth = depth + 1
+            except SearchTimeout():
+                break
+        
+        return best_move
 
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf")):
         """Implement depth-limited minimax search with alpha-beta pruning as
@@ -347,5 +355,39 @@ class AlphaBetaPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        # TODO: finish this function!
-        raise NotImplementedError
+        return self.alphabetaHelper(game, depth,alpha,beta)[0]
+
+    def alphabetaHelper(self, game, depth, alpha, beta):
+        """Helper function for minimax search with alpha beta pruning
+        **********************************************************************
+
+        Parameters
+        ----------
+        game : isolation.Board
+            An instance of the Isolation game `Board` class representing the
+            current game state
+
+        depth : int
+            Depth is an integer representing the maximum number of plies to
+            search in the game tree before aborting
+
+        alpha : float
+            Alpha limits the lower bound of search on minimizing layers
+
+        beta : float
+            Beta limits the upper bound of search on maximizing layers
+
+        Returns
+        -------
+        ((int, int), int)
+            Tuple where the first entry is the best move and the second is the corresponding value
+        
+        """
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+                
+        # Check which player's turn it is, and appropriately designate max/min as the function
+        if game.active_player == self:
+            fn, val = max, float("-inf")
+        else:
+            fn, val = min, float("inf")
