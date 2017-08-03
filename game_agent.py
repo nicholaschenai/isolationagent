@@ -34,8 +34,13 @@ def custom_score(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    # TODO: finish this function!
-    raise NotImplementedError
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
+    return 0
 
 
 def custom_score_2(game, player):
@@ -60,10 +65,14 @@ def custom_score_2(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    # TODO: finish this function!
-    raise NotImplementedError
+    if game.is_loser(player):
+        return float("-inf")
 
-
+    if game.is_winner(player):
+        return float("inf")
+    
+    return 0
+    
 def custom_score_3(game, player):
     """Calculate the heuristic value of a game state from the point of view
     of the given player.
@@ -86,8 +95,24 @@ def custom_score_3(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    # TODO: finish this function!
-    raise NotImplementedError
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+        
+    own_moves = len(game.get_legal_moves(player))
+    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    
+    coeff = 1 # coefficient which weights the importance of increasing own moves vs reducing opponent's moves
+    min_coeff = 1 # min value of coeff   
+    max_coeff = 2 # max value of coeff
+    
+    # fraction of occupied squares 
+    frac_occupied = 1 - len(game.get_blank_spaces()) / float(game.width * game.height)        
+    coeff = min_coeff + (max_coeff - min_coeff) * frac_occupied
+    
+    return float(own_moves - coeff * opp_moves)
 
 
 class IsolationPlayer:
@@ -402,7 +427,7 @@ class AlphaBetaPlayer(IsolationPlayer):
                 trialGame = game.forecast_move(move)
                 trialScore = self.alphabetaHelper(trialGame, depth-1, alpha, beta)[1]
                 # if current move gives the best score, keep it
-                if fn(trialScore, val) == trialScore:
+                if (fn(trialScore, val)) == trialScore and (trialScore != val):
                     best_move, val = move, trialScore
                 # pruning
                 if ((alphaPlayer and val >= beta) or (not alphaPlayer and val <= alpha)):
