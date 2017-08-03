@@ -302,7 +302,7 @@ class AlphaBetaPlayer(IsolationPlayer):
             try:
                 best_move = self.alphabeta(game, depth)
                 depth = depth + 1
-            except SearchTimeout():
+            except SearchTimeout:
                 break
         
         return best_move
@@ -355,9 +355,9 @@ class AlphaBetaPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        return self.alphabetaHelper(game, depth,alpha,beta)[0]
+        return self.alphabetaHelper(game,depth,alpha,beta)[0]
 
-    def alphabetaHelper(self, game, depth, alpha, beta):
+    def alphabetaHelper(self, game, depth, alpha=float("-inf"), beta=float("inf")):
         """Helper function for minimax search with alpha beta pruning
         **********************************************************************
 
@@ -388,6 +388,29 @@ class AlphaBetaPlayer(IsolationPlayer):
                 
         # Check which player's turn it is, and appropriately designate max/min as the function
         if game.active_player == self:
-            fn, val = max, float("-inf")
+            fn, val, alphaPlayer = max, float("-inf"), True
         else:
-            fn, val = min, float("inf")
+            fn, val, alphaPlayer = min, float("inf"), False
+            
+        # when the search terminates, return the score of the current position
+        if depth == 0:
+            return (None, self.score(game, self))
+        else:
+            best_move = (-1, -1)
+            # go through each legal move and evaluate the score, iterate up to specified depth
+            for move in game.get_legal_moves():
+                trialGame = game.forecast_move(move)
+                trialScore = self.alphabetaHelper(trialGame, depth-1, alpha, beta)[1]
+                # if current move gives the best score, keep it
+                if fn(trialScore, val) == trialScore:
+                    best_move, val = move, trialScore
+                # pruning
+                if ((alphaPlayer and val >= beta) or (not alphaPlayer and val <= alpha)):
+                    return (best_move, val) 
+                # update alpha/beta
+                if alphaPlayer:
+                    alpha = max(alpha, val)
+                else:
+                    beta = min(beta, val)
+            
+            return (best_move, val) 
