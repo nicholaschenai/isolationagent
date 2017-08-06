@@ -3,7 +3,7 @@ test your agent's strength against a set of known agents using tournament.py
 and include the results in your report.
 """
 import random
-
+import math
 
 class SearchTimeout(Exception):
     """Subclass base exception for code clarity. """
@@ -40,7 +40,7 @@ def custom_score(game, player):
     if game.is_winner(player):
         return float("inf")
 
-    return 0
+    return custom_score_2(game, player) + custom_score_3(game, player)
 
 
 def custom_score_2(game, player):
@@ -65,13 +65,35 @@ def custom_score_2(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
+    def euclidean_distance(y1,x1,y2,x2):
+        """Calculate the Euclidean distance between two points
+        
+        Parameters
+        ----------
+        y1,x1,y2,x2: float
+            x, y coordinates of the first and second point respectively
+            
+        Returns
+        -------
+        float
+            The Euclidean distance between the two points
+        """
+        return math.sqrt((y1-y2)**2 + (x1-x2)**2)
+        
     if game.is_loser(player):
         return float("-inf")
 
     if game.is_winner(player):
         return float("inf")
     
-    return 0
+    w, h = game.width / 2., game.height / 2.
+    y_own, x_own = game.get_player_location(player)
+    y_opp, x_opp = game.get_player_location(game.get_opponent(player))
+    # get distance from center for both players
+    own_centrality = euclidean_distance(y_own, x_own, w, h)
+    opp_centrality = euclidean_distance(y_opp, x_opp, w, h)
+    # rewards when opponent is far from center and self is close to center
+    return opp_centrality - own_centrality
     
 def custom_score_3(game, player):
     """Calculate the heuristic value of a game state from the point of view
@@ -321,7 +343,11 @@ class AlphaBetaPlayer(IsolationPlayer):
         """
         self.time_left = time_left
         
-        best_move = (-1, -1)
+        legal_moves = game.get_legal_moves()
+        if not legal_moves:
+            best_move = (-1, -1)
+        else:
+            best_move = legal_moves[0]
         depth = 1
         while True:
             try:
@@ -421,9 +447,13 @@ class AlphaBetaPlayer(IsolationPlayer):
         if depth == 0:
             return (None, self.score(game, self))
         else:
-            best_move = (-1, -1)
+            legal_moves = game.get_legal_moves()
+            if not legal_moves:
+                best_move = (-1, -1)
+            else:
+                best_move = legal_moves[0]
             # go through each legal move and evaluate the score, iterate up to specified depth
-            for move in game.get_legal_moves():
+            for move in legal_moves:
                 trialGame = game.forecast_move(move)
                 trialScore = self.alphabetaHelper(trialGame, depth-1, alpha, beta)[1]
                 # if current move gives the best score, keep it
