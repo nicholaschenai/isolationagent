@@ -16,7 +16,9 @@ Their main goal is to search through moves efficiently and effectively --  Go ha
 
 Main contribution is to combine value and policy networks with MCTS
 
-Previous programs used shallow policies or handcrafted value functions (often based on a linear combination of features). AlphaGo uses value networks in place of handcrafted value functions.
+Previous programs used shallow policies or handcrafted value functions (often based on a linear combination of features). AlphaGo uses value networks in place of handcrafted value functions. 
+AlphaGo efficiently combines the value and policy networks with MCTS.
+
 
 ### Monte Carlo tree search (MCTS)
 
@@ -37,10 +39,18 @@ Next, they initialized a reinforcement learning policy network with the supervis
 
 Lastly, they train a value network that predicts the winner of games played by the reinforcement learning policy network against itself.
 
-AlphaGo efficiently combines the value and policy networks with MCTS.
+### Combining MCTS with policy and value networks
+
+AlphaGo selects actions by lookahead search. The action selected for a state is one which maximizes the action value plus a bonus. The action value is calculated from the leaf evaluations normalized by the number of visits. This leaf evaluation is calculated from a linear combination of the output from the value network and the outcome after a random rollout played using the fast policy network. The bonus is proportional to the prior probability (output from the policy network) but inversely proportional to the number of visits to encourage exploration.
 
 # Results
 
 The supervised learning policy network was able to predict expert moves with an accuracy of 57.0% compared to the state-of-the-art accuracy of 44.4%.
 
 The reinforcement learning policy network won 85% of games against Pachi, the strongest open-source Go program, without using any search techniques.
+
+Single-machine AlphaGo won 494 out of 495 games (win rate of 99.8%) against other Go programs. The distributed computing version of AlphaGo won 100% of the games against other Go programs and 77% of games against single-machine AlphaGo.
+
+Using only the value and policy networks (without rollouts), AlphaGo exceeded the performance of all other Go programs in terms of Elo rating. This shows that value networks are a viable alternative to Monte Carlo evaluation in Go. The best combination, however, is when the value network and rollout are used together for evaluation, winning over 95% of games against other variants, suggesting that these two evaluation techniques complement each other.
+
+The distributed version of AlphaGo won 5-0 against Fan Hui, the European Go champion for 2013-2015. This is the first time a computer Go program beat a human professional in the full game of Go, a feat previously thought to be at least a decade away. In this match, AlphaGo evaluated thousands of times fewer positions compared to Deep Blue in the chess game against Kasparov, despite the fact that the search space for chess is much smaller than that for Go: AlphaGo had to select positions more intelligently and evaluate them more precisely, closer to how humans play. While Deep Blue used a handcrafted evaluation function, AlphaGo's evaluations are from neural networks trained directly from gameplay.

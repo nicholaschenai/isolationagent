@@ -133,7 +133,7 @@ $(document).ready(function () {
 <div id="techniques-introduced" class="section level1">
 <h1>Techniques introduced</h1>
 <p>Main contribution is to combine value and policy networks with MCTS</p>
-<p>Previous programs used shallow policies or handcrafted value functions (often based on a linear combination of features). AlphaGo uses value networks in place of handcrafted value functions.</p>
+<p>Previous programs used shallow policies or handcrafted value functions (often based on a linear combination of features). AlphaGo uses value networks in place of handcrafted value functions. AlphaGo efficiently combines the value and policy networks with MCTS.</p>
 <div id="monte-carlo-tree-search-mcts" class="section level3">
 <h3>Monte Carlo tree search (MCTS)</h3>
 <p>Monte Carlo tree search (MCTS) is the main search algorithm to estimate the value of each state in the search tree. MCTS consists of 4 steps:</p>
@@ -150,13 +150,19 @@ $(document).ready(function () {
 <p>The policy network is first trained via supervised learning, where the inputs are expert human moves from the KGS Go Server and the output is the probability distribution over legal moves. Also, they trained a fast policy network which is less accurate but returns the output faster (by a factor of ~1000).</p>
 <p>Next, they initialized a reinforcement learning policy network with the supervised learning policy network from above, and trained the reinforcement learning policy network via games of self-play and optimizing for the final outcome .</p>
 <p>Lastly, they train a value network that predicts the winner of games played by the reinforcement learning policy network against itself.</p>
-<p>AlphaGo efficiently combines the value and policy networks with MCTS.</p>
+</div>
+<div id="combining-mcts-with-policy-and-value-networks" class="section level3">
+<h3>Combining MCTS with policy and value networks</h3>
+<p>AlphaGo selects actions by lookahead search. The action selected for a state is one which maximizes the action value plus a bonus. The action value is calculated from the leaf evaluations normalized by the number of visits. This leaf evaluation is calculated from a linear combination of the output from the value network and the outcome after a random rollout played using the fast policy network. The bonus is proportional to the prior probability (output from the policy network) but inversely proportional to the number of visits to encourage exploration.</p>
 </div>
 </div>
 <div id="results" class="section level1">
 <h1>Results</h1>
 <p>The supervised learning policy network was able to predict expert moves with an accuracy of 57.0% compared to the state-of-the-art accuracy of 44.4%.</p>
 <p>The reinforcement learning policy network won 85% of games against Pachi, the strongest open-source Go program, without using any search techniques.</p>
+<p>Single-machine AlphaGo won 494 out of 495 games (win rate of 99.8%) against other Go programs. The distributed computing version of AlphaGo won 100% of the games against other Go programs and 77% of games against single-machine AlphaGo.</p>
+<p>Using only the value and policy networks (without rollouts), AlphaGo exceeded the performance of all other Go programs in terms of Elo rating. This shows that value networks are a viable alternative to Monte Carlo evaluation in Go. The best combination, however, is when the value network and rollout are used together for evaluation, winning over 95% of games against other variants, suggesting that these two evaluation techniques complement each other.</p>
+<p>The distributed version of AlphaGo won 5-0 against Fan Hui, the European Go champion for 2013-2015. This is the first time a computer Go program beat a human professional in the full game of Go, a feat previously thought to be at least a decade away. In this match, AlphaGo evaluated thousands of times fewer positions compared to Deep Blue in the chess game against Kasparov, despite the fact that the search space for chess is much smaller than that for Go: AlphaGo had to select positions more intelligently and evaluate them more precisely, closer to how humans play. While Deep Blue used a handcrafted evaluation function, AlphaGo’s evaluations are from neural networks trained directly from gameplay.</p>
 </div>
 
 
