@@ -344,6 +344,7 @@ class AlphaBetaPlayer(IsolationPlayer):
         self.time_left = time_left
         
         legal_moves = game.get_legal_moves()
+        # Use the first legal move if there is not enough time for search
         if not legal_moves:
             best_move = (-1, -1)
         else:
@@ -352,6 +353,7 @@ class AlphaBetaPlayer(IsolationPlayer):
         while True:
             try:
                 best_move = self.alphabeta(game, depth)
+                # iterative deepening
                 depth = depth + 1
             except SearchTimeout:
                 break
@@ -448,6 +450,8 @@ class AlphaBetaPlayer(IsolationPlayer):
             return (None, self.score(game, self))
         else:
             legal_moves = game.get_legal_moves()
+            
+            # Use the first legal move if there is not enough time for search
             if not legal_moves:
                 best_move = (-1, -1)
             else:
